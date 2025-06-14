@@ -1,6 +1,5 @@
 import unittest
 from unittest.mock import patch, mock_open
-import pandas as pd
 from hkopenai.hk_housing_mcp_server.tool_private_storage import (
     fetch_private_storage_data,
     get_private_storage
