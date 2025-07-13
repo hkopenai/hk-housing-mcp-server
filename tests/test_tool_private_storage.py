@@ -116,8 +116,8 @@ Year,Completions,Completions - Remarks,Stock at year end,Stock at year end - Rem
         with patch(
             "hkopenai.hk_housing_mcp_server.tool_private_storage._get_private_storage"
         ) as mock_get_private_storage:
-            decorated_function(year=2023)
-            mock_get_private_storage.assert_called_once_with(year=2023)
+            decorated_function(2023)
+            mock_get_private_storage.assert_called_once_with(2023)
 
 
 if __name__ == "__main__":
