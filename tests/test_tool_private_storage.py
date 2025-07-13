@@ -6,10 +6,11 @@ filtering private storage statistics data from the Rating and Valuation Departme
 """
 
 import unittest
-from unittest.mock import patch, mock_open
+from unittest.mock import patch, mock_open, MagicMock
 from hkopenai.hk_housing_mcp_server.tool_private_storage import (
     fetch_private_storage_data,
-    get_private_storage,
+    _get_private_storage,
+    register,
 )
 
 
@@ -64,7 +65,7 @@ Year,Completions,Completions - Remarks,Stock at year end,Stock at year end - Rem
         
         This test ensures that all data is returned when no year filter is applied.
         """
-        result = get_private_storage()
+        result = _get_private_storage()
         self.assertEqual(len(result), 9)
         self.assertEqual(result[0]["Year"], 1985)
         self.assertEqual(result[0]["Vacancy as a % of stock"], 0.032)
@@ -76,11 +77,49 @@ Year,Completions,Completions - Remarks,Stock at year end,Stock at year end - Rem
         This test verifies that filtering by a specific year returns only the data
         for that year.
         """
-        result = get_private_storage(year=1990)
+        result = _get_private_storage(year=1990)
         self.assertEqual(len(result), 1)
         self.assertEqual(result[0]["Year"], 1990)
         self.assertEqual(result[0]["Vacancy as a % of stock"], 0.011)
 
+    def test_register_tool(self):
+        """
+        Test the registration of the get_private_storage tool.
+
+        This test verifies that the register function correctly registers the tool
+        with the FastMCP server and that the registered tool calls the underlying
+        _get_private_storage function.
+        """
+        mock_mcp = MagicMock()
+
+        # Call the register function
+        register(mock_mcp)
+
+        # Verify that mcp.tool was called with the correct description
+        mock_mcp.tool.assert_called_once_with(
+            description="Private Storage - Completions, Stock and Vacancy in Hong Kong. Data source: Rating and Valuation Department"
+        )
+
+        # Get the mock that represents the decorator returned by mcp.tool
+        mock_decorator = mock_mcp.tool.return_value
+
+        # Verify that the mock decorator was called once (i.e., the function was decorated)
+        mock_decorator.assert_called_once()
+
+        # The decorated function is the first argument of the first call to the mock_decorator
+        decorated_function = mock_decorator.call_args[0][0]
+
+        # Verify the name of the decorated function
+        self.assertEqual(decorated_function.__name__, "get_private_storage")
+
+        # Call the decorated function and verify it calls _get_private_storage
+        with patch(
+            "hkopenai.hk_housing_mcp_server.tool_private_storage._get_private_storage"
+        ) as mock_get_private_storage:
+            decorated_function(year=2023)
+            mock_get_private_storage.assert_called_once_with(year=2023)
+
 
 if __name__ == "__main__":
     unittest.main()
+

@@ -22,7 +22,19 @@ def fetch_private_storage_data() -> pd.DataFrame:
     return df
 
 
-def get_private_storage(
+def register(mcp):
+    """Registers the private storage tool with the FastMCP server."""
+    @mcp.tool(
+        description="Private Storage - Completions, Stock and Vacancy in Hong Kong. Data source: Rating and Valuation Department"
+    )
+    def get_private_storage(
+        year: Annotated[Optional[int], Field(description="Filter by specific year")] = None,
+    ) -> List[Dict]:
+        """Get private storage statistics data with optional year filter"""
+        return _get_private_storage(year)
+
+
+def _get_private_storage(
     year: Annotated[Optional[int], Field(description="Filter by specific year")] = None,
 ) -> List[Dict]:
     """Get private storage statistics data with optional year filter"""

@@ -15,15 +15,7 @@ def create_mcp_server():
     """Create and configure the MCP server"""
     mcp = FastMCP(name="HK OpenAI housing Server")
 
-    @mcp.tool(
-        description="Private Storage - Completions, Stock and Vacancy in Hong Kong. Data source: Rating and Valuation Department"
-    )
-    def get_private_storage(
-        year: Annotated[
-            Optional[int], Field(description="Filter by specific year")
-        ] = None,
-    ) -> Dict:
-        return tool_private_storage.get_private_storage(year)
+    tool_private_storage.register(mcp)
 
     return mcp
 
