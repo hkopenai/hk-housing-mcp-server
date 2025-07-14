@@ -48,4 +48,4 @@ def _get_private_storage(
         df = df[df["Year"] == year]
 
     # Convert to list of dicts
-    return df.to_dict("records")
+    return df.to_dict(orient="records")
