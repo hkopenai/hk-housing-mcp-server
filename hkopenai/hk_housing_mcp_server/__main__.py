@@ -5,8 +5,6 @@ This module imports and calls the main function from the server module to start
 the MCP server application.
 """
 
-
-
 from hkopenai_common.cli_utils import cli_main
 from .server import server
 

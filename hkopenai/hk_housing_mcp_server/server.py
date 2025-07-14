@@ -7,8 +7,7 @@ specifically private storage information from the Rating and Valuation Departmen
 
 from fastmcp import FastMCP
 from hkopenai.hk_housing_mcp_server import tool_private_storage
-from typing import Dict, Annotated, Optional
-from pydantic import Field
+
 
 
 def create_mcp_server():
@@ -23,7 +22,7 @@ def create_mcp_server():
 def main(host: str, port: int, sse: bool):
     """
     Main function to run the MCP Server.
-    
+
     Args:
         args: Command line arguments passed to the function.
     """
@@ -31,7 +30,9 @@ def main(host: str, port: int, sse: bool):
 
     if sse:
         server.run(transport="streamable-http", host=host, port=port)
-        print(f"MCP Server running in SSE mode on port {args.port}, bound to {args.host}")
+        print(
+            f"MCP Server running in SSE mode on port {args.port}, bound to {args.host}"
+        )
     else:
         server.run()
         print("MCP Server running in stdio mode")

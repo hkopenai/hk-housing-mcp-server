@@ -13,16 +13,17 @@ from hkopenai.hk_housing_mcp_server.server import create_mcp_server
 class TestApp(unittest.TestCase):
     """
     Test class for verifying MCP server functionality.
-    
+
     This class contains test cases to ensure the server is created correctly
     and that tools are properly registered and callable.
     """
+
     @patch("hkopenai.hk_housing_mcp_server.server.FastMCP")
     @patch("hkopenai.hk_housing_mcp_server.server.tool_private_storage")
     def test_create_mcp_server(self, mock_tool_private_storage, mock_fastmcp):
         """
         Test the creation of the MCP server and tool registration.
-        
+
         This test verifies that the server is created with the correct configuration,
         tools are registered properly, and they call the underlying functions as expected.
         """

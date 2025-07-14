@@ -6,11 +6,11 @@ and Valuation Department (RVD) and filter the data based on specific criteria.
 """
 
 import io
-import pandas as pd
-import requests
 from typing import Dict, List, Optional
 from pydantic import Field
 from typing_extensions import Annotated
+import pandas as pd
+import requests
 
 
 def fetch_private_storage_data() -> pd.DataFrame:
@@ -24,11 +24,14 @@ def fetch_private_storage_data() -> pd.DataFrame:
 
 def register(mcp):
     """Registers the private storage tool with the FastMCP server."""
+
     @mcp.tool(
         description="Private Storage - Completions, Stock and Vacancy in Hong Kong. Data source: Rating and Valuation Department"
     )
     def get_private_storage(
-        year: Annotated[Optional[int], Field(description="Filter by specific year")] = None,
+        year: Annotated[
+            Optional[int], Field(description="Filter by specific year")
+        ] = None,
     ) -> List[Dict]:
         """Get private storage statistics data with optional year filter"""
         return _get_private_storage(year)

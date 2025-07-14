@@ -17,10 +17,11 @@ from hkopenai.hk_housing_mcp_server.tool_private_storage import (
 class TestPrivateStorage(unittest.TestCase):
     """
     Test class for verifying private storage data retrieval functionality.
-    
+
     This class contains test cases to ensure data is fetched correctly and can be
     filtered by year as expected.
     """
+
     CSV_DATA = """"PRIVATE   STORAGE  -  COMPLETIONS,   STOCK   AND   VACANCY",,,,,,,,
 Year,Completions,Completions - Remarks,Stock at year end,Stock at year end - Remarks,Vacancy at year end,Vacancy at year end - Remarks,Vacancy as a % of stock,Vacancy as a % of stock - Remarks
 1985,108600,,1910100,,61800,,0.032,
@@ -36,7 +37,7 @@ Year,Completions,Completions - Remarks,Stock at year end,Stock at year end - Rem
     def setUp(self):
         """
         Set up test fixtures before each test method.
-        
+
         This method mocks the HTTP request to return predefined CSV data for testing.
         """
         self.mock_requests = patch("requests.get").start()
@@ -49,7 +50,7 @@ Year,Completions,Completions - Remarks,Stock at year end,Stock at year end - Rem
     def test_fetch_private_storage_data(self):
         """
         Test fetching private storage data.
-        
+
         This test verifies that the data is fetched correctly and contains the expected
         number of records and values for the first record.
         """
@@ -62,7 +63,7 @@ Year,Completions,Completions - Remarks,Stock at year end,Stock at year end - Rem
     def test_get_private_storage_default(self):
         """
         Test getting private storage data without filters.
-        
+
         This test ensures that all data is returned when no year filter is applied.
         """
         result = _get_private_storage()
@@ -73,7 +74,7 @@ Year,Completions,Completions - Remarks,Stock at year end,Stock at year end - Rem
     def test_get_private_storage_year_filter(self):
         """
         Test getting private storage data with a year filter.
-        
+
         This test verifies that filtering by a specific year returns only the data
         for that year.
         """
@@ -122,4 +123,3 @@ Year,Completions,Completions - Remarks,Stock at year end,Stock at year end - Rem
 
 if __name__ == "__main__":
     unittest.main()
-

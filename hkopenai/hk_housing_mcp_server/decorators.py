@@ -5,6 +5,7 @@ This module provides utilities for creating decorators that can be used to
 register tools and other functionalities within the MCP server framework.
 """
 
+
 def create_tool_registry():
     """Create a tool registry decorator that tracks decorated functions by name.
 
