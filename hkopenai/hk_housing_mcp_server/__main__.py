@@ -6,7 +6,7 @@ the MCP server application.
 """
 
 from hkopenai_common.cli_utils import cli_main
-from .server import server
+from . import server
 
 if __name__ == "__main__":
-    cli_main(server, "HK Housing MCP Server")
+    cli_main(server.main, "HK Housing MCP Server")
