@@ -6,33 +6,13 @@ specifically private storage information from the Rating and Valuation Departmen
 """
 
 from fastmcp import FastMCP
-from hkopenai.hk_housing_mcp_server import tool_private_storage
+from .tools import private_storage
 
 
-
-def create_mcp_server():
+def server():
     """Create and configure the MCP server"""
     mcp = FastMCP(name="HK OpenAI housing Server")
 
-    tool_private_storage.register(mcp)
+    private_storage.register(mcp)
 
     return mcp
-
-
-def main(host: str, port: int, sse: bool):
-    """
-    Main function to run the MCP Server.
-
-    Args:
-        args: Command line arguments passed to the function.
-    """
-    server = create_mcp_server()
-
-    if sse:
-        server.run(transport="streamable-http", host=host, port=port)
-        print(
-            f"MCP Server running in SSE mode on port {port}, bound to {host}"
-        )
-    else:
-        server.run()
-        print("MCP Server running in stdio mode")

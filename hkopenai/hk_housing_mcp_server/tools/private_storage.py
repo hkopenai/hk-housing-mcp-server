@@ -5,21 +5,11 @@ This module provides tools to retrieve private storage statistics from the Ratin
 and Valuation Department (RVD) and filter the data based on specific criteria.
 """
 
-import io
 from typing import Dict, List, Optional
 from pydantic import Field
 from typing_extensions import Annotated
+from hkopenai_common.csv_utils import fetch_csv_from_url
 import pandas as pd
-import requests
-
-
-def fetch_private_storage_data() -> pd.DataFrame:
-    """Fetch private storage statistics data from RVD"""
-    url = "http://www.rvd.gov.hk/datagovhk/Private_Storage.csv"
-    response = requests.get(url)
-    response.encoding = "utf-8-sig"  # Handle BOM if present
-    df = pd.read_csv(io.StringIO(response.text), skiprows=1)
-    return df
 
 
 def register(mcp):
@@ -41,11 +31,9 @@ def _get_private_storage(
     year: Annotated[Optional[int], Field(description="Filter by specific year")] = None,
 ) -> List[Dict]:
     """Get private storage statistics data with optional year filter"""
-    df = fetch_private_storage_data()
+    data = fetch_csv_from_url("http://www.rvd.gov.hk/datagovhk/Private_Storage.csv", encoding="utf-8-sig", delimiter=",")
 
-    # Apply filter if provided
-    if year is not None:
-        df = df[df["Year"] == year]
+    if "error" in data:
+        return {"type": "Error", "error": data["error"]}
 
-    # Convert to list of dicts
-    return df.to_dict(orient="records")
+    df = pd.DataFrame(data[1:]) # Skip the first row (title)

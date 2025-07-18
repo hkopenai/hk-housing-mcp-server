@@ -1,14 +1,14 @@
 """
-Module for testing private storage data retrieval functions.
+Module for testing the private storage tool functionality.
 
-This module contains unit tests to verify the functionality of fetching and
-filtering private storage statistics data from the Rating and Valuation Department.
+This module contains unit tests for fetching and processing private storage data.
 """
 
 import unittest
-from unittest.mock import patch, mock_open, MagicMock
-from hkopenai.hk_housing_mcp_server.tool_private_storage import (
-    fetch_private_storage_data,
+from unittest.mock import patch, MagicMock
+import pandas as pd
+
+from hkopenai.hk_housing_mcp_server.tools.private_storage import (
     _get_private_storage,
     register,
 )
@@ -16,72 +16,49 @@ from hkopenai.hk_housing_mcp_server.tool_private_storage import (
 
 class TestPrivateStorage(unittest.TestCase):
     """
-    Test class for verifying private storage data retrieval functionality.
+    Test class for verifying private storage functionality.
 
-    This class contains test cases to ensure data is fetched correctly and can be
-    filtered by year as expected.
+    This class contains test cases to ensure the data fetching and processing
+    for private storage data work as expected.
     """
 
-    CSV_DATA = """"PRIVATE   STORAGE  -  COMPLETIONS,   STOCK   AND   VACANCY",,,,,,,,
-Year,Completions,Completions - Remarks,Stock at year end,Stock at year end - Remarks,Vacancy at year end,Vacancy at year end - Remarks,Vacancy as a % of stock,Vacancy as a % of stock - Remarks
-1985,108600,,1910100,,61800,,0.032,
-1986,110100,,2003400,,51800,,0.026,
-1987,32600,,1889300,,4200,,0.002,
-1988,214000,,2087500,,53000,,0.025,
-1989,61100,,2085800,,58300,,0.028,
-1990,76000,,2116000,,22500,,0.011,
-1991,538400,,2756200,,283600,,0.103,
-1992,474400,,3223800,,395700,,0.123,
-1993,102900,,3263100,,208600,,0.064"""
-
-    def setUp(self):
+    def test_get_private_storage(self):
         """
-        Set up test fixtures before each test method.
+        Test the retrieval and filtering of private storage statistics.
 
-        This method mocks the HTTP request to return predefined CSV data for testing.
+        This test verifies that the function correctly fetches and filters data by year,
+        and handles error cases.
         """
-        self.mock_requests = patch("requests.get").start()
-        mock_response = mock_open(read_data=self.CSV_DATA.encode("utf-8-sig"))()
-        mock_response.encoding = "utf-8-sig"
-        mock_response.text = self.CSV_DATA
-        self.mock_requests.return_value = mock_response
-        self.addCleanup(patch.stopall)
+        # Mock the CSV data
+        mock_csv_data = [
+            {"Year": "2020", "Completions": "100", "Stock": "1000", "Vacancy": "50"},
+            {"Year": "2021", "Completions": "110", "Stock": "1100", "Vacancy": "55"},
+            {"Year": "2022", "Completions": "120", "Stock": "1200", "Vacancy": "60"},
+        ]
 
-    def test_fetch_private_storage_data(self):
-        """
-        Test fetching private storage data.
+        with patch(
+            "hkopenai_common.csv_utils.fetch_csv_from_url"
+        ) as mock_fetch_csv_from_url:
+            # Setup mock response for successful data fetching
+            mock_fetch_csv_from_url.return_value = mock_csv_data
 
-        This test verifies that the data is fetched correctly and contains the expected
-        number of records and values for the first record.
-        """
-        df = fetch_private_storage_data()
-        self.assertEqual(len(df), 9)  # 9 years of data
-        self.assertEqual(df.iloc[0]["Year"], 1985)
-        self.assertEqual(df.iloc[0]["Completions"], 108600)
-        self.assertEqual(df.iloc[0]["Vacancy as a % of stock"], 0.032)
+            # Test filtering by year
+            result = _get_private_storage(year=2021)
+            self.assertEqual(len(result), 1)
+            self.assertEqual(result[0]["Year"], 2021)
 
-    def test_get_private_storage_default(self):
-        """
-        Test getting private storage data without filters.
+            # Test no year filter
+            result = _get_private_storage()
+            self.assertEqual(len(result), 3)
 
-        This test ensures that all data is returned when no year filter is applied.
-        """
-        result = _get_private_storage()
-        self.assertEqual(len(result), 9)
-        self.assertEqual(result[0]["Year"], 1985)
-        self.assertEqual(result[0]["Vacancy as a % of stock"], 0.032)
+            # Test empty result for non-matching year
+            result = _get_private_storage(year=2023)
+            self.assertEqual(len(result), 0)
 
-    def test_get_private_storage_year_filter(self):
-        """
-        Test getting private storage data with a year filter.
-
-        This test verifies that filtering by a specific year returns only the data
-        for that year.
-        """
-        result = _get_private_storage(year=1990)
-        self.assertEqual(len(result), 1)
-        self.assertEqual(result[0]["Year"], 1990)
-        self.assertEqual(result[0]["Vacancy as a % of stock"], 0.011)
+            # Test error handling when fetch_csv_from_url returns an error
+            mock_fetch_csv_from_url.return_value = {"error": "CSV fetch failed"}
+            result = _get_private_storage(year=2021)
+            self.assertEqual(result, {"type": "Error", "error": "CSV fetch failed"})
 
     def test_register_tool(self):
         """
@@ -115,11 +92,7 @@ Year,Completions,Completions - Remarks,Stock at year end,Stock at year end - Rem
 
         # Call the decorated function and verify it calls _get_private_storage
         with patch(
-            "hkopenai.hk_housing_mcp_server.tool_private_storage._get_private_storage"
+            "hkopenai.hk_housing_mcp_server.tools.private_storage._get_private_storage"
         ) as mock_get_private_storage:
-            decorated_function(2023)
-            mock_get_private_storage.assert_called_once_with(2023)
-
-
-if __name__ == "__main__":
-    unittest.main()
+            decorated_function(year=2021)
+            mock_get_private_storage.assert_called_once_with(2021)
