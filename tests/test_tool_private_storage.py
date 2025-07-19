@@ -37,17 +37,16 @@ class TestPrivateStorage(unittest.TestCase):
         ]
 
         with patch(
-            "hkopenai_common.csv_utils.fetch_csv_from_url"
+            "hkopenai.hk_housing_mcp_server.tools.private_storage.fetch_csv_from_url"
         ) as mock_fetch_csv_from_url:
             # Setup mock response for successful data fetching
             mock_fetch_csv_from_url.return_value = mock_csv_data
 
             # Test filtering by year
             result = _get_private_storage(year=2021)
-            print(result)
-
+            
             self.assertEqual(len(result), 1)
-            self.assertEqual(result[0]["Year"], 2021)
+            self.assertEqual(int(result[0]["Year"]), 2021)  # Convert to int since CSV returns strings
             self.assertEqual(result[0]["Stock_at_year_end"], 1100)
             self.assertEqual(result[0]["Vacancy_at_year_end"], 55)
             self.assertEqual(result[0]["Vacancy_as_a_percent_of_stock"], 5.0)
@@ -59,6 +58,11 @@ class TestPrivateStorage(unittest.TestCase):
             # Test empty result for non-matching year
             result = _get_private_storage(year=2023)
             self.assertEqual(len(result), 0)
+            
+            # Test string year input
+            result = _get_private_storage(year="2021")
+            self.assertEqual(len(result), 1)
+            self.assertEqual(result[0]["Year"], 2021)  # Verify integer comparison works
 
             # Test error handling when fetch_csv_from_url returns an error
             mock_fetch_csv_from_url.return_value = {"error": "CSV fetch failed"}

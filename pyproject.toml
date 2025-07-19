@@ -26,7 +26,7 @@ authors = [
 ]
 license = "MIT"
 classifiers = [ "Programming Language :: Python :: 3", "Operating System :: OS Independent",]
-dependencies = [ "fastmcp>=2.10.2", "pytest>=8.2.0", "pytest-cov>=6.1.1", "modelcontextprotocol", "hkopenai_common>=0.4.0",]
+dependencies = [ "fastmcp>=2.10.2", "pytest>=8.2.0", "pytest-cov>=6.1.1", "modelcontextprotocol", "hkopenai_common>=0.5.0",]
 
 [project.scripts]
 hk_housing_mcp_server = "hkopenai.hk_housing_mcp_server.__main__:main"

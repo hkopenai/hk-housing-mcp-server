@@ -28,9 +28,12 @@ def _get_private_storage(
     year: Annotated[Optional[int], Field(description="Filter by specific year")] = None,
 ) -> List[Dict]:
     """Get private storage statistics data with optional year filter"""
-    data = fetch_csv_from_url("http://www.rvd.gov.hk/datagovhk/Private_Storage.csv", encoding="utf-8-sig", delimiter=",")
+    data = fetch_csv_from_url("http://www.rvd.gov.hk/datagovhk/Private_Storage.csv", encoding="utf-8-sig", delimiter=",", has_title_row=True)
 
     if "error" in data:
         return data
 
+    if year is not None:
+        data = [row for row in data if int(row.get("Year", 0)) == int(year)]
+    
     return data
