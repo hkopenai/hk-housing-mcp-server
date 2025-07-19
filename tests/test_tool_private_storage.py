@@ -29,11 +29,11 @@ class TestPrivateStorage(unittest.TestCase):
         This test verifies that the function correctly fetches and filters data by year,
         and handles error cases.
         """
-        # Mock the CSV data
+        # Mock the CSV data with structure matching actual implementation
         mock_csv_data = [
-            {"Year": "2020", "Completions": "100", "Stock": "1000", "Vacancy": "50"},
-            {"Year": "2021", "Completions": "110", "Stock": "1100", "Vacancy": "55"},
-            {"Year": "2022", "Completions": "120", "Stock": "1200", "Vacancy": "60"},
+            {"Year": 2020, "Completions": 100, "Completions_Remarks": "", "Stock_at_year_end": 1000, "Stock_at_year_end_Remarks": "", "Vacancy_at_year_end": 50, "Vacancy_at_year_end_Remarks": "", "Vacancy_as_a_percent_of_stock": 5.0, "Vacancy_as_a_percent_of_stock_Remarks": ""},
+            {"Year": 2021, "Completions": 110, "Completions_Remarks": "", "Stock_at_year_end": 1100, "Stock_at_year_end_Remarks": "", "Vacancy_at_year_end": 55, "Vacancy_at_year_end_Remarks": "", "Vacancy_as_a_percent_of_stock": 5.0, "Vacancy_as_a_percent_of_stock_Remarks": ""},
+            {"Year": 2022, "Completions": 120, "Completions_Remarks": "", "Stock_at_year_end": 1200, "Stock_at_year_end_Remarks": "", "Vacancy_at_year_end": 60, "Vacancy_at_year_end_Remarks": "", "Vacancy_as_a_percent_of_stock": 5.0, "Vacancy_as_a_percent_of_stock_Remarks": ""}
         ]
 
         with patch(
@@ -44,8 +44,13 @@ class TestPrivateStorage(unittest.TestCase):
 
             # Test filtering by year
             result = _get_private_storage(year=2021)
+            print(result)
+
             self.assertEqual(len(result), 1)
             self.assertEqual(result[0]["Year"], 2021)
+            self.assertEqual(result[0]["Stock_at_year_end"], 1100)
+            self.assertEqual(result[0]["Vacancy_at_year_end"], 55)
+            self.assertEqual(result[0]["Vacancy_as_a_percent_of_stock"], 5.0)
 
             # Test no year filter
             result = _get_private_storage()
@@ -58,7 +63,12 @@ class TestPrivateStorage(unittest.TestCase):
             # Test error handling when fetch_csv_from_url returns an error
             mock_fetch_csv_from_url.return_value = {"error": "CSV fetch failed"}
             result = _get_private_storage(year=2021)
-            self.assertEqual(result, {"type": "Error", "error": "CSV fetch failed"})
+            self.assertEqual(result, {"error": "CSV fetch failed"})
+
+            # Test empty data case
+            mock_fetch_csv_from_url.return_value = []
+            result = _get_private_storage(year=2021)
+            self.assertEqual(result, [])
 
     def test_register_tool(self):
         """
